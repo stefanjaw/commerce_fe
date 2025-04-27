@@ -51,8 +51,10 @@ class _MainPageState extends State<MainPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            const SizedBox(height: 20),
             Text('Welcome ${user?.email ?? "User"}!'),
             const SizedBox(height: 20),
             DropdownButton<String>(

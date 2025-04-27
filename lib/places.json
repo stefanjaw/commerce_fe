@@ -1,0 +1,102 @@
+places = [
+    {
+        "name": "The Gourmet Bistro",
+        "type": "Restaurant",
+        "products": {
+            "beverages": [
+                "Red Wine",
+                "Craft Beer",
+                "Mojito",
+                "Iced Tea",
+                "Fresh Lemonade"
+            ],
+            "meals": [
+                "Grilled Salmon",
+                "Vegetable Risotto",
+                "Chicken Parmesan",
+                "Beef Tacos",
+                "Caesar Salad"
+            ]
+        }
+    },
+    {
+        "name": "Sunny Beach Bar",
+        "type": "Bar",
+        "products": {
+            "beverages": [
+                "Pina Colada",
+                "Margarita",
+                "Vodka Tonic",
+                "Rum Punch",
+                "Soft Drink"
+            ],
+            "meals": [
+                "Fish and Chips",
+                "Nachos",
+                "Buffalo Wings",
+                "Shrimp Tacos",
+                "Cheeseburger"
+            ]
+        }
+    },
+    {
+        "name": "Little Italy",
+        "type": "Restaurant",
+        "products": {
+            "beverages": [
+                "Italian Red Wine",
+                "Espresso",
+                "Prosecco",
+                "Sparkling Water",
+                "Limoncello"
+            ],
+            "meals": [
+                "Margherita Pizza",
+                "Pasta Carbonara",
+                "Lasagna",
+                "Caprese Salad",
+                "Tiramisu"
+            ]
+        }
+    },
+    {
+        "name": "The Urban Pub",
+        "type": "Bar",
+        "products": {
+            "beverages": [
+                "Craft Lager",
+                "IPA",
+                "Old Fashioned",
+                "Whiskey Sour",
+                "Cider"
+            ],
+            "meals": [
+                "Pork Belly Sliders",
+                "Loaded Potato Skins",
+                "Grilled Cheese Sandwich",
+                "Fried Calamari",
+                "Chili Fries"
+            ]
+        }
+    },
+    {
+        "name": "Spice Route",
+        "type": "Restaurant",
+        "products": {
+            "beverages": [
+                "Mango Lassi",
+                "Chai Tea",
+                "Coconut Water",
+                "Masala Soda",
+                "Tandoori Lemonade"
+            ],
+            "meals": [
+                "Butter Chicken",
+                "Paneer Tikka",
+                "Biryani",
+                "Samosas",
+                "Naan Bread"
+            ]
+        }
+    }
+]
