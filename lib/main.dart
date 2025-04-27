@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart'; // Import Firebase
 import 'firebase_options.dart'; // Import your Firebase configuration
-
+import 'screen_main/main_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,6 +74,16 @@ class _LoginPageState extends State<LoginPage> {
                 // TODO: Implement password reset
               },
               child: const Text('Forgot Password?'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const MainPage(),
+                  ),
+                );
+              },
+              child: const Text('Go to Main Page'),
             ),
           ],
         ),
