@@ -1,0 +1,9 @@
+flutter clean
+
+flutter pub get
+
+flutter run
+
+flutter channel stable
+flutter upgrade
+

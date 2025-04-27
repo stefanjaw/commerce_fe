@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -21,6 +22,16 @@ class _MainPageState extends State<MainPage> {
 
   void _signOut() async {
     await FirebaseAuth.instance.signOut();
+  }
+
+  void _saveSelectedPlace() async {
+    if (selectedValue != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('place_id', selectedValue!);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Selected place saved: $selectedValue')),
+      );
+    }
   }
 
   @override
@@ -44,40 +55,27 @@ class _MainPageState extends State<MainPage> {
           children: [
             Text('Welcome ${user?.email ?? "User"}!'),
             const SizedBox(height: 20),
-            const Text('You have successfully logged in.'),
-            const SizedBox(height: 20),
-            Autocomplete<String>(
-              optionsBuilder: (TextEditingValue textEditingValue) {
-                if (textEditingValue.text == '') {
-                  return options;
-                }
-                return options.where((String option) {
-                  return option.toLowerCase()
-                      .contains(textEditingValue.text.toLowerCase());
-                });
-              },
-              onSelected: (String selection) {
-                setState(() {
-                  selectedValue = selection;
-                });
-              },
-              fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
-                return TextField(
-                  controller: textEditingController,
-                  focusNode: focusNode,
-                  decoration: InputDecoration(
-                    labelText: 'Select a venue',
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.arrow_drop_down),
-                  ),
+            DropdownButton<String>(
+              value: selectedValue,
+              hint: const Text('Select a place'),
+              isExpanded: true,
+              items: options.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
                 );
+              }).toList(),
+              onChanged: (String? value) {
+                setState(() {
+                  selectedValue = value;
+                });
               },
             ),
-            if (selectedValue != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: Text('Selected venue: $selectedValue'),
-              ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: selectedValue != null ? _saveSelectedPlace : null,
+              child: const Text('Save Selection'),
+            ),
           ],
         ),
       ),
