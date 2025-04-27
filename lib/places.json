@@ -1,6 +1,7 @@
 places = [
     {
         "name": "The Gourmet Bistro",
+        "id": "123a",
         "type": "Restaurant",
         "products": {
             "beverages": [
@@ -21,6 +22,7 @@ places = [
     },
     {
         "name": "Sunny Beach Bar",
+        "id": "123b",
         "type": "Bar",
         "products": {
             "beverages": [
@@ -41,6 +43,7 @@ places = [
     },
     {
         "name": "Little Italy",
+        "id": "123c",
         "type": "Restaurant",
         "products": {
             "beverages": [
@@ -61,6 +64,7 @@ places = [
     },
     {
         "name": "The Urban Pub",
+        "id": "123d",
         "type": "Bar",
         "products": {
             "beverages": [
@@ -81,6 +85,7 @@ places = [
     },
     {
         "name": "Spice Route",
+        "id": "123e",
         "type": "Restaurant",
         "products": {
             "beverages": [
