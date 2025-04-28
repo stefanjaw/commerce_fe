@@ -14,6 +14,7 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   String? selectedValue;
+  String? placeName;
   List<Map<String, dynamic>> places = [];
 
   @override
@@ -21,6 +22,14 @@ class _MainPageState extends State<MainPage> {
     super.initState();
     loadPlaces();
     loadSavedPlace();
+    loadPlaceName();
+  }
+
+  Future<void> loadPlaceName() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      placeName = prefs.getString('place_name');
+    });
   }
 
   Future<void> loadPlaces() async {
@@ -91,6 +100,7 @@ class _MainPageState extends State<MainPage> {
           children: [
             const SizedBox(height: 20),
             Text('Welcome ${user?.email ?? "User"}!'),
+            if (placeName != null) Text('Selected Place: $placeName', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             Autocomplete<Map<String, dynamic>>(
               optionsBuilder: (TextEditingValue textEditingValue) {
