@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,22 +13,14 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   String? selectedValue;
-  String? placeName;
   List<Map<String, dynamic>> places = [];
+  String? placeName; // Added placeName to the state
 
   @override
   void initState() {
     super.initState();
     loadPlaces();
     loadSavedPlace();
-    loadPlaceName();
-  }
-
-  Future<void> loadPlaceName() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      placeName = prefs.getString('place_name');
-    });
   }
 
   Future<void> loadPlaces() async {
@@ -50,9 +41,10 @@ class _MainPageState extends State<MainPage> {
   Future<void> loadSavedPlace() async {
     final prefs = await SharedPreferences.getInstance();
     final savedId = prefs.getString('place_id');
+    final savedName = prefs.getString('place_name'); // Load saved place name
     setState(() {
-      // Only set the selected value if it exists in the places list
       selectedValue = places.any((place) => place['id'] == savedId) ? savedId : null;
+      placeName = savedName; // Set placeName from prefs
     });
   }
 
@@ -60,18 +52,22 @@ class _MainPageState extends State<MainPage> {
     await FirebaseAuth.instance.signOut();
   }
 
-  void _saveSelectedPlace() async {
+  Future<void> _saveSelectedPlace() async {
     if (selectedValue != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('place_id', selectedValue!);
-      
+
       // Find the selected place name from the places list
       final selectedPlace = places.firstWhere(
         (place) => place['id'] == selectedValue,
         orElse: () => {'name': 'Unknown'},
       );
       await prefs.setString('place_name', selectedPlace['name']);
-      
+
+      setState(() {
+        placeName = selectedPlace['name'];
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Selected place saved: ${selectedPlace['name']}')),
       );
@@ -100,17 +96,14 @@ class _MainPageState extends State<MainPage> {
           children: [
             const SizedBox(height: 20),
             Text('Welcome ${user?.email ?? "User"}!'),
-            if (placeName != null) Text('Selected Place: $placeName', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
             Autocomplete<Map<String, dynamic>>(
               optionsBuilder: (TextEditingValue textEditingValue) {
                 if (textEditingValue.text == '') {
                   return places;
                 }
-                return places.where((place) => 
-                  place['name'].toString().toLowerCase()
-                    .contains(textEditingValue.text.toLowerCase())
-                );
+                return places.where((place) =>
+                    place['name'].toString().toLowerCase().contains(textEditingValue.text.toLowerCase()));
               },
               displayStringForOption: (Map<String, dynamic> option) => option['name'],
               onSelected: (Map<String, dynamic> selection) {
@@ -124,15 +117,17 @@ class _MainPageState extends State<MainPage> {
                   focusNode: focusNode,
                   decoration: InputDecoration(
                     hintText: 'Search for a place',
-                    suffixIcon: selectedValue != null ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        textEditingController.clear();
-                        setState(() {
-                          selectedValue = null;
-                        });
-                      },
-                    ) : null,
+                    suffixIcon: selectedValue != null
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              textEditingController.clear();
+                              setState(() {
+                                selectedValue = null;
+                              });
+                            },
+                          )
+                        : null,
                   ),
                 );
               },
@@ -142,6 +137,8 @@ class _MainPageState extends State<MainPage> {
               onPressed: selectedValue != null ? _saveSelectedPlace : null,
               child: const Text('Save Selection'),
             ),
+            if (placeName != null) //Added to display the placeName
+              Text('Selected Place: $placeName'),
           ],
         ),
       ),
