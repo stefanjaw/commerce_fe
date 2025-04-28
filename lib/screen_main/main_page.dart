@@ -40,8 +40,10 @@ class _MainPageState extends State<MainPage> {
 
   Future<void> loadSavedPlace() async {
     final prefs = await SharedPreferences.getInstance();
+    final savedId = prefs.getString('place_id');
     setState(() {
-      selectedValue = prefs.getString('place_id');
+      // Only set the selected value if it exists in the places list
+      selectedValue = places.any((place) => place['id'] == savedId) ? savedId : null;
     });
   }
 
