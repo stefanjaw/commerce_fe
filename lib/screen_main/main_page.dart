@@ -55,8 +55,16 @@ class _MainPageState extends State<MainPage> {
     if (selectedValue != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('place_id', selectedValue!);
+      
+      // Find the selected place name from the places list
+      final selectedPlace = places.firstWhere(
+        (place) => place['id'] == selectedValue,
+        orElse: () => {'name': 'Unknown'},
+      );
+      await prefs.setString('place_name', selectedPlace['name']);
+      
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Selected place saved: $selectedValue')),
+        SnackBar(content: Text('Selected place saved: ${selectedPlace['name']}')),
       );
     }
   }
