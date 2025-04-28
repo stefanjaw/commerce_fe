@@ -11,9 +11,11 @@ dependencies:
   firebase_core: null
   flutter:
     sdk: flutter
+  
   google_sign_in: null
   shared_preferences: ^2.0.0 
   shared_preferences_web: null
+
 
 dev_dependencies:
   flutter_test:
@@ -22,3 +24,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/places.json

@@ -2,6 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -12,13 +14,36 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   String? selectedValue;
-  final List<String> options = [
-    'restaurant1',
-    'restaurant2',
-    'restaurant3',
-    'bar1',
-    'bar2',
-  ];
+  List<Map<String, dynamic>> places = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadPlaces();
+    loadSavedPlace();
+  }
+
+  Future<void> loadPlaces() async {
+    try {
+      final String jsonString = await rootBundle.loadString('places.json');
+      final List<dynamic> jsonData = json.decode(jsonString);
+      setState(() {
+        places = jsonData.map((place) => {
+          'id': place['id'],
+          'name': place['name'],
+        }).toList();
+      });
+    } catch (e) {
+      print('Error loading places: $e');
+    }
+  }
+
+  Future<void> loadSavedPlace() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      selectedValue = prefs.getString('place_id');
+    });
+  }
 
   void _signOut() async {
     await FirebaseAuth.instance.signOut();
@@ -61,10 +86,10 @@ class _MainPageState extends State<MainPage> {
               value: selectedValue,
               hint: const Text('Select a place'),
               isExpanded: true,
-              items: options.map((String value) {
+              items: places.map((place) {
                 return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
+                  value: place['id'],
+                  child: Text(place['name']),
                 );
               }).toList(),
               onChanged: (String? value) {
