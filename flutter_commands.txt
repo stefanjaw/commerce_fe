@@ -7,3 +7,9 @@ flutter run
 flutter channel stable
 flutter upgrade
 
+
+# git reset SOFT
+git reset --soft HEAD~1
+
+# GIT reset as the origin main
+git reset --hard origin/main
