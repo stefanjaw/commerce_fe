@@ -14,7 +14,10 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   String? selectedValue;
   List<Map<String, dynamic>> places = [];
-  String? placeName; // Added placeName to the state
+  String? placeName;
+  Map<String, List<String>> selectedProducts = {};
+  Map<String, Map<String, int>> quantities = {};
+  Map<String, dynamic> currentPlace = {};
 
   @override
   void initState() {
@@ -31,6 +34,7 @@ class _MainPageState extends State<MainPage> {
         places = jsonData.map((place) => {
           'id': place['id'],
           'name': place['name'],
+          'products': place['products'] // Assuming places.json has a 'products' field
         }).toList();
       });
     } catch (e) {
@@ -41,10 +45,13 @@ class _MainPageState extends State<MainPage> {
   Future<void> loadSavedPlace() async {
     final prefs = await SharedPreferences.getInstance();
     final savedId = prefs.getString('place_id');
-    final savedName = prefs.getString('place_name'); // Load saved place name
+    final savedName = prefs.getString('place_name');
     setState(() {
       selectedValue = places.any((place) => place['id'] == savedId) ? savedId : null;
-      placeName = savedName; // Set placeName from prefs
+      placeName = savedName;
+      if (selectedValue != null) {
+        currentPlace = places.firstWhere((place) => place['id'] == selectedValue);
+      }
     });
   }
 
@@ -57,7 +64,6 @@ class _MainPageState extends State<MainPage> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('place_id', selectedValue!);
 
-      // Find the selected place name from the places list
       final selectedPlace = places.firstWhere(
         (place) => place['id'] == selectedValue,
         orElse: () => {'name': 'Unknown'},
@@ -66,6 +72,7 @@ class _MainPageState extends State<MainPage> {
 
       setState(() {
         placeName = selectedPlace['name'];
+        currentPlace = selectedPlace;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -73,6 +80,19 @@ class _MainPageState extends State<MainPage> {
       );
     }
   }
+
+  void _updateQuantity(String category, String product, int quantity) {
+    setState(() {
+      quantities[category] ??= {};
+      quantities[category]![product] = quantity;
+    });
+  }
+
+  void _placeOrder() {
+    // Implement order placement logic here
+    print('Order placed: $quantities');
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +129,7 @@ class _MainPageState extends State<MainPage> {
               onSelected: (Map<String, dynamic> selection) {
                 setState(() {
                   selectedValue = selection['id'];
+                  currentPlace = selection;
                 });
               },
               fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
@@ -124,6 +145,7 @@ class _MainPageState extends State<MainPage> {
                               textEditingController.clear();
                               setState(() {
                                 selectedValue = null;
+                                currentPlace = {};
                               });
                             },
                           )
@@ -137,8 +159,71 @@ class _MainPageState extends State<MainPage> {
               onPressed: selectedValue != null ? _saveSelectedPlace : null,
               child: const Text('Save Selection'),
             ),
-            if (placeName != null) //Added to display the placeName
+            if (placeName != null)
               Text('Selected Place: $placeName'),
+            if (currentPlace.containsKey('products'))
+              Expanded(
+                child: SingleChildScrollView(
+                  child: DataTable(
+                    columns: const <DataColumn>[
+                      DataColumn(label: Text('Category')),
+                      DataColumn(label: Text('Product')),
+                      DataColumn(label: Text('Qty')),
+                      DataColumn(label: Text('')),
+                    ],
+                    rows: currentPlace['products'].entries.expand<DataRow>((entry) {
+                      String category = entry.key;
+                      return (entry.value as List).map<DataRow>((productName) {
+                        return DataRow(
+                          cells: <DataCell>[
+                            DataCell(Text(category)),
+                            DataCell(Text(productName.toString())),
+                            DataCell(
+                              Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.remove),
+                                  onPressed: () {
+                                    final currentQty = quantities[category]?[productName] ?? 0;
+                                    _updateQuantity(category, productName, currentQty > 0 ? currentQty - 1 : 0);
+                                  },
+                                ),
+                                Text('${quantities[category]?[productName] ?? 0}'),
+                                IconButton(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () {
+                                    final currentQty = quantities[category]?[productName] ?? 0;
+                                    _updateQuantity(category, productName, currentQty + 1);
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          DataCell(Checkbox(
+                            value: selectedProducts[category]?.contains(productName) ?? false,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedProducts[category] ??= [];
+                                if (value!) {
+                                  selectedProducts[category]!.add(productName);
+                                } else {
+                                  selectedProducts[category]!.remove(productName);
+                                }
+                              });
+                            },
+                          )),
+                        ],
+                      );
+                    }).toList();
+                    }).toList(),
+                  ),
+                ),
+              ),
+            ElevatedButton(
+              onPressed: _placeOrder,
+              child: const Text('Place Order'),
+            ),
           ],
         ),
       ),
