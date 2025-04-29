@@ -31,6 +31,44 @@
 
   <title>commerce_fe</title>
   <link rel="manifest" href="manifest.json">
+  <script>
+    // Initialize IndexedDB
+    window.db = null;
+    const dbName = "OrdersDB";
+    const request = indexedDB.open(dbName, 1);
+
+    request.onerror = (event) => {
+      console.error("Database error:", event.target.error);
+    };
+
+    request.onupgradeneeded = (event) => {
+      window.db = event.target.result;
+      if (!window.db.objectStoreNames.contains('orders')) {
+        window.db.createObjectStore('orders', { keyPath: 'timestamp' });
+      }
+    };
+
+    request.onsuccess = (event) => {
+      window.db = event.target.result;
+    };
+
+    // Store order function
+    window.storeOrder = function(orderDataString) {
+      if (!window.db) {
+        console.error("Database not initialized");
+        return;
+      }
+      try {
+        const orderData = JSON.parse(orderDataString);
+        const transaction = window.db.transaction(['orders'], 'readwrite');
+        const store = transaction.objectStore('orders');
+        store.put(orderData);
+        console.log("Order stored successfully", orderData);
+      } catch (e) {
+        console.error("Error storing order:", e);
+      }
+    };
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" defer></script>

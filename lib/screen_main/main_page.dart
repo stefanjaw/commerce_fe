@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import 'dart:js' as js;
 import 'package:flutter/services.dart' show rootBundle;
 
 class MainPage extends StatefulWidget {
@@ -89,8 +90,25 @@ class _MainPageState extends State<MainPage> {
   }
 
   void _placeOrder() {
-    // Implement order placement logic here
-    print('Order placed: $quantities');
+    // Convert quantities to a format suitable for JS
+    Map<String, dynamic> orderData = {
+      'quantities': quantities,
+      'selectedProducts': selectedProducts,
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+
+    // Use JS interop to store data in IndexedDB
+    js.context.callMethod('storeOrder', [json.encode(orderData)]);
+
+    // Clear current selections
+    setState(() {
+      quantities.clear();
+      selectedProducts.clear();
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Order saved successfully')),
+    );
   }
 
 
