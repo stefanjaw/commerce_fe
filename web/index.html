@@ -80,39 +80,10 @@
       const request = store.getAll();
 
       request.onsuccess = () => {
-        const orders = request.result;
-        console.log('Orders from IndexedDB:', orders);
-
-        // Create popup content
-        let popupContent = '<div style="padding: 20px;">';
-        popupContent += '<h2>Orders</h2>';
-        if (orders.length === 0) {
-          popupContent += '<p>No orders found</p>';
-        } else {
-          popupContent += '<ul style="list-style: none; padding: 0;">';
-          orders.forEach(order => {
-            popupContent += `<li style="margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
-              ${JSON.stringify(order, null, 2)}
-            </li>`;
-          });
-          popupContent += '</ul>';
+        console.log('Orders from IndexedDB:', request.result);
+        if (window.setOrdersCallback) {
+          window.setOrdersCallback(request.result);
         }
-        popupContent += '</div>';
-
-        // Create and show popup window
-        const popup = window.open('', 'Orders', 'width=600,height=400,scrollbars=yes');
-        popup.document.write(`
-          <html>
-            <head>
-              <title>Orders</title>
-              <style>
-                body { font-family: Arial, sans-serif; }
-                pre { white-space: pre-wrap; }
-              </style>
-            </head>
-            <body>${popupContent}</body>
-          </html>
-        `);
       };
 
       request.onerror = (event) => {

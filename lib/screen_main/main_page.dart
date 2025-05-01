@@ -89,6 +89,18 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
+  List<dynamic> orders = [];
+
+  void _showOrders() {
+    js.context.callMethod('showOrders');
+    final callback = js.allowInterop((dynamic result) {
+      setState(() {
+        orders = result;
+      });
+    });
+    js.context['setOrdersCallback'] = callback;
+  }
+
   void _placeOrder() {
     // Convert quantities to a format suitable for JS
     Map<String, dynamic> orderData = {
@@ -100,11 +112,13 @@ class _MainPageState extends State<MainPage> {
     // Use JS interop to store data in IndexedDB
     js.context.callMethod('storeOrder', [json.encode(orderData)]);
 
-    // Clear current selections
+    // Clear current selections and show orders
     setState(() {
       quantities.clear();
       selectedProducts.clear();
     });
+
+    _showOrders();
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Order saved successfully')),
@@ -242,6 +256,26 @@ class _MainPageState extends State<MainPage> {
               onPressed: _placeOrder,
               child: const Text('Place Order'),
             ),
+            if (orders.isNotEmpty) ...[
+              const Divider(height: 20),
+              const Text('Recent Orders:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: orders.length,
+                  itemBuilder: (context, index) {
+                    final order = orders[index];
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 5),
+                      child: ListTile(
+                        title: Text('Order ${index + 1}'),
+                        subtitle: Text('Time: ${order['timestamp']}'),
+                        trailing: const Icon(Icons.receipt_long),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
           ],
         ),
       ),
