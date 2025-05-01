@@ -68,9 +68,92 @@
         console.error("Error storing order:", e);
       }
     };
+
+    window.showOrders = function() {
+      if (!window.db) {
+        console.error("Database not initialized");
+        return;
+      }
+
+      const transaction = window.db.transaction(['orders'], 'readonly');
+      const store = transaction.objectStore('orders');
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        const orders = request.result;
+        console.log('Orders from IndexedDB:', orders);
+
+        // Create popup content
+        let popupContent = '<div style="padding: 20px;">';
+        popupContent += '<h2>Orders</h2>';
+        if (orders.length === 0) {
+          popupContent += '<p>No orders found</p>';
+        } else {
+          popupContent += '<ul style="list-style: none; padding: 0;">';
+          orders.forEach(order => {
+            popupContent += `<li style="margin-bottom: 10px; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+              ${JSON.stringify(order, null, 2)}
+            </li>`;
+          });
+          popupContent += '</ul>';
+        }
+        popupContent += '</div>';
+
+        // Create and show popup window
+        const popup = window.open('', 'Orders', 'width=600,height=400,scrollbars=yes');
+        popup.document.write(`
+          <html>
+            <head>
+              <title>Orders</title>
+              <style>
+                body { font-family: Arial, sans-serif; }
+                pre { white-space: pre-wrap; }
+              </style>
+            </head>
+            <body>${popupContent}</body>
+          </html>
+        `);
+      };
+
+      request.onerror = (event) => {
+        console.error('Error fetching orders:', event.target.error);
+      };
+    };
   </script>
 </head>
 <body>
+  <style>
+    #showOrdersBtn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 15px;
+      background-color: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 1000;
+      transition: transform 0.2s;
+    }
+    #showOrdersBtn:hover {
+      transform: scale(1.1);
+    }
+    .emergency-icon {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+  </style>
+  <button id="showOrdersBtn" onclick="showOrders()" title="Show Orders">
+    <svg class="emergency-icon" viewBox="0 0 24 24">
+      <path d="M12 2L1 21h22L12 2zm0 3.45l8.27 14.32H3.73L12 5.45zm-1.5 8.5v4h3v-4h-3zm0-5v3h3v-3h-3z"/>
+    </svg>
+  </button>
   <script src="flutter_bootstrap.js" defer></script>
   <script>
     window.addEventListener('load', function(ev) {
